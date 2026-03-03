@@ -1,0 +1,21 @@
+# Tar is used because the default actions do not preserve directory structure
+# and file mode.
+name: Save artifacts
+description: An action to tar and upload artifacts.
+inputs:
+  directory:
+    description: Path of the directory to save
+    default: ".build"
+runs:
+  using: composite
+  steps:
+    - run: |
+        tar cvf artifact.tar ${{ inputs.directory }}
+        mv artifact.tar artifact-$(sha1sum artifact.tar|awk '{ print $1 }').tar
+        echo NAME=$(echo artifact-*.tar) >> $GITHUB_OUTPUT
+      shell: bash
+      id: tar
+    - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: ${{ steps.tar.outputs.NAME }}
+        path: artifact-*.tar

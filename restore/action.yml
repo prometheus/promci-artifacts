@@ -1,0 +1,21 @@
+# Restore artifacts created by save_artifacts.
+# Tar is used because the default actions do not preserve directory structure
+# and file mode.
+name: Restore artifacts
+description: An action to restore and untar artifacts.
+runs:
+  using: composite
+  steps:
+    - name: Download all workflow run artifacts
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      with:
+        pattern: artifact-*
+        merge-multiple: true
+        path: .artifacts
+    - run: |
+        for tar in .artifacts/*.tar
+        do
+          tar xvf $tar
+          rm $tar
+        done
+      shell: bash
